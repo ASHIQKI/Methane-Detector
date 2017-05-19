@@ -320,7 +320,7 @@ void loop(){
                            bd=0x0000;
                }
                sprintf(tempbuff,"+CON:%02x,%s,%d",vrsn,senno,bd);
-               //Serial.println(tempbuff);
+               Serial.println(tempbuff);
                break;             
       case 's'://VERSION
                readings= ieee754_Conv(&sensor_resp_data[10],4);
