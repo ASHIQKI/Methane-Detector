@@ -74,6 +74,26 @@ uint16_t crc16(uint8_t const message[], int nBytes) {
     return (remainder);
 }
 
+
+//FUNCTION TO CONSTRUCT IEEE754 VALUES
+char * ieee754creator(float data){
+    static char array[4];
+    union {
+      unsigned char c[4];
+      float f;
+    } u;
+    u.f=data;
+    array[0]=u.c[0];
+    array[1]=u.c[1];
+    array[2]=u.c[2];
+    array[3]=u.c[3];
+    return array;
+}
+
+
+
+
+
 //FUNCTION TO CALCULATE IEE754 floating format
 float ieee754_Conv(const void *vptr, int nBytes) {
     /*int i;
