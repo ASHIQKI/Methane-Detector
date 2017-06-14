@@ -20,6 +20,7 @@ char sensor_resp_data[300];
 uint8_t sensor_resp_full_index=0,sensor_resp_data_index=0,pc_cmd_index=0,pc_cmd_rcvd=0,sensor_resp_rcvd=0;
 char identifier;
 uint8_t cal_flag=0;
+uint8_t data_for_span=60;
 char tempbuff[128];
 
 
@@ -145,6 +146,7 @@ float ieee754_Conv(const void *vptr, int nBytes) {
 //EXECUTES LOOP CONTINUESLY
 void loop(){
   char fch4[9],ftemp[9],variation;
+  char *datapointer;
   float readings;
   uint16_t status_live;
   uint8_t j=0;
@@ -231,9 +233,24 @@ void loop(){
         //Serial.write(sensor_Cmds[j]);
       }                  
     }
-    if(strstr(pc_cmd,(char *)"MD+SPAN=?"))
+    if(strstr(pc_cmd,(char *)"MD+SPAN="))
     {
       uint8_t i=0;
+      uint8_t value=0;
+      for(i=0;pc_cmd[i]!='\0';i++){
+        if(pc_cmd[i]=='='){
+          i++;
+          while(pc_cmd[i]!='?'){
+            value=(value*10)+((pc_cmd[i])-'0');
+           // Serial.print(value);
+            i++;
+          }
+        }
+      }
+      data_for_span=value;
+      //data_for_span=atoi(token);
+      //Serial.println(data_for_span);
+      i=0;
       identifier='S';
       cal_flag=1;   
       sensor_Cmds[i++]=DLE;
@@ -390,10 +407,11 @@ void loop(){
                calibration_zero[j++]=0x10;
                calibration_zero[j++]=0x1A;
                calibration_zero[j++]=0x04;
-               calibration_zero[j++]=0x00;
-               calibration_zero[j++]=0x00;
-               calibration_zero[j++]=0x70;
-               calibration_zero[j++]=0x42;
+               datapointer=ieee754creator(data_for_span);
+               calibration_zero[j++]=*datapointer++;
+               calibration_zero[j++]=*datapointer++;;
+               calibration_zero[j++]=*datapointer++;;
+               calibration_zero[j++]=*datapointer;
                calibration_zero[j++]=0x10;
                calibration_zero[j++]=0x1F;
                crcVal=crcorchecksum(calibration_zero,j);
@@ -401,7 +419,7 @@ void loop(){
                calibration_zero[j++]=((crcVal&0x00FF));
                for(uint8_t i=0;i<j;i++) {
                  Serial1.write(calibration_zero[i]);
-                 //Serial.write(calibration_zero[i]);
+                // Serial.write(calibration_zero[i]);
                }         
                break;
               
